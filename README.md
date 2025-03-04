@@ -66,6 +66,8 @@ docker-compose up -d
 | qBittorrent | http://localhost:8282         |
 | Prowlarr    | http://localhost:9696         |
 | Homarr      | http://localhost:7575         |
+| Nginx       | http://localhost:80           |
+| Hassio      | http://localhost:8123         |
 
 ### Configurazione
 - È possibile configurare i vari servizi da web utilizzando la loro documentazione (https://wiki.servarr.com/)
