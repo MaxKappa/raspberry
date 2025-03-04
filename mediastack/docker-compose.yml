@@ -1,0 +1,117 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=airvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=[redacted]
+      - WIREGUARD_PUBLIC_KEY=[redacted]
+      - WIREGUARD_PRESHARED_KEY=[redacted]
+      - WIREGUARD_ALLOWED_IPS=0.0.0.0/0,::/0
+      - WIREGUARD_ADDRESSES=[redacted]
+      - WIREGUARD_ENDPOINT=[redacted]
+      - FIREWALL_VPN_INPUT_PORTS=[redacted]
+    volumes:
+      - ./gluetun/config:/gluetun/config
+    ports:
+      - 8282:8282
+      - 8000:8000
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Rome
+    volumes:
+      - ./radarr/config:/config
+      - /mnt/HDD/media/movies:/movies
+      - /mnt/HDD/media/downloads:/downloads
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+  
+  sonarr:
+    image: lscr.io/linuxserver/sonarr
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Rome
+    volumes:
+      - ./sonarr/config:/config
+      -  /mnt/HDD/media/tvseries:/tvseries
+      -  /mnt/HDD/media/downloads:/downloads
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Rome
+    volumes:
+      #  - /mnt/HDD/media/movies:/movies
+      #  - /mnt/HDD/media/tvseries:/tvseries
+      -   /mnt/HDD/media/movies:/movies
+      -   /mnt/HDD/media/tvseries:/tvseries
+      - ./jellyfin/config:/config
+      - ./jellyfin/cache:/cache
+    ports:
+      - 8096:8096
+    restart: unless-stopped
+
+  qbittorrent:
+    image: linuxserver/qbittorrent
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Rome
+      - WEBUI_PORT=8282
+    volumes:
+      -  /mnt/HDD/media/downloads:/downloads
+      - ./qbittorrent/config:/config
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Rome
+    volumes:
+      - ./prowlarr/config:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
+  flaresolverr:
+    network_mode: "host"
+    image: flaresolverr/flaresolverr
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+
+  homarr:
+    container_name: homarr
+    image: ghcr.io/homarr-labs/homarr:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+      - ./homarr/appdata:/appdata
+    environment:
+      - SECRET_ENCRYPTION_KEY=[redacted]
+    ports:
+      - '7575:7575'

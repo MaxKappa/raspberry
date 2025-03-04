@@ -1,0 +1,14 @@
+mediastack/jellyfin
+mediastack/media
+mediastack/radarr
+mediastack/sonarr
+mediastack/homarr
+mediastack/qbittorrent
+mediastack/prowlarr
+*.log
+*..docker-compose.yml.swp
+logs
+nginx/data
+nginx/letsencrypt
+StreamingCommunity
+homeassistant/config
